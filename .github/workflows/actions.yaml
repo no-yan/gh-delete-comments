@@ -31,6 +31,8 @@ jobs:
             | jq -r '.[].id'
 
 
+          echo "Comments: $comments"
+
           # Loop through each comment and delete it
           for comment_id in $comments; do
             echo "Deleting comment ID: $comment_id"
