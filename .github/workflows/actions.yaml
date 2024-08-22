@@ -20,9 +20,11 @@ jobs:
           sudo apt-get install jq -y
 
           # Get the list of comments on the PR
-          comments=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-              | jq -r '.[].id')
+          comments=$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments)
+
 
           # Loop through each comment and delete it
           for comment_id in $comments; do
