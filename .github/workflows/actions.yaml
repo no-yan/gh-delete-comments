@@ -1,0 +1,32 @@
+name: Delete PR Comments
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  delete-comments:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Delete PR comments
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Install jq to parse JSON
+          sudo apt-get install jq -y
+
+          # Get the list of comments on the PR
+          comments=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+              | jq -r '.[].id')
+
+          # Loop through each comment and delete it
+          for comment_id in $comments; do
+            echo "Deleting comment ID: $comment_id"
+            curl -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
+                "https://api.github.com/repos/${{ github.repository }}/issues/comments/$comment_id"
+          done
